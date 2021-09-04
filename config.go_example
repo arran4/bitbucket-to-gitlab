@@ -1,0 +1,6 @@
+package main
+
+const gitlab_api_token = ""
+const gitlab_url = ""
+const bitbucket_api_token = ""
+const bitbucket_username = ""
