@@ -37,6 +37,12 @@ func main() {
 
 func copyRepos(wsprojects []*WorkspaceProjectPair) {
 	for _, wsp := range wsprojects {
+
+		if wsp.FullRepo {
+			log.Printf("Not empty")
+			continue
+		}
+
 		srcRepo := fmt.Sprintf("https://%s@bitbucket.org/%s/%s.git", bitbucket_username, wsp.WorkspaceSlug, wsp.ProjectSlug)
 		log.Printf("Git clone; %s", srcRepo)
 		if err := exec.Command("git", "clone", "--mirror", srcRepo, "t").Run(); err != nil {
@@ -99,6 +105,8 @@ func createRepos(gl *gitlab.Client, wsprojects []*WorkspaceProjectPair) {
 				}
 				panic(err)
 			}
+		} else {
+			wsp.FullRepo = p.EmptyRepo
 		}
 	}
 }
@@ -167,6 +175,7 @@ type WorkspaceProjectPair struct {
 	NamespaceId   *int
 	ProjectSlug   string
 	WorkspaceUUID string
+	FullRepo      bool
 }
 
 func listWorkspacesAndProjects(c *bitbucket.Client) []*WorkspaceProjectPair {
