@@ -37,7 +37,7 @@ func main() {
 
 func copyRepos(wsprojects []*WorkspaceProjectPair) {
 	for _, wsp := range wsprojects {
-		srcRepo := fmt.Sprintf("https://arran4@bitbucket.org/%s/%s.git", wsp.WorkspaceSlug, wsp.ProjectSlug)
+		srcRepo := fmt.Sprintf("https://%s@bitbucket.org/%s/%s.git", bitbucket_username, wsp.WorkspaceSlug, wsp.ProjectSlug)
 		log.Printf("Git clone; %s", srcRepo)
 		if err := exec.Command("git", "clone", "--mirror", srcRepo, "t").Run(); err != nil {
 			panic(err)
@@ -53,7 +53,7 @@ func copyRepos(wsprojects []*WorkspaceProjectPair) {
 		if err := c.Run(); err != nil {
 			panic(err)
 		}
-		destRepo := fmt.Sprintf("https://gitlab.arran.net.au/%s/%s.git", wsp.WorkspaceSlug, wsp.ProjectSlug)
+		destRepo := fmt.Sprintf("%s/%s/%s.git", gitlab_url, wsp.WorkspaceSlug, wsp.ProjectSlug)
 		log.Printf("Git add origin; %s", destRepo)
 		c = exec.Command("git", "remote", "add", "origin", destRepo)
 		c.Dir = dir
