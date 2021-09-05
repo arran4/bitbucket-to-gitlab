@@ -63,7 +63,7 @@ func copyRepos(wsprojects []*WorkspaceProjectPair) {
 			log.Printf("%v", err)
 			failed = append(failed, wsp)
 		}
-		destRepo := fmt.Sprintf("%s.git", path.Join(gitlab_url, wsp.WorkspaceSlug, wsp.ProjectSlug))
+		destRepo := fmt.Sprintf("https://%s.git", path.Join(strings.TrimPrefix(gitlab_url, "https://"), wsp.WorkspaceSlug, wsp.ProjectSlug))
 		log.Printf("Git add origin; %s", destRepo)
 		c = exec.Command("git", "remote", "add", "origin", destRepo)
 		c.Dir = dir
