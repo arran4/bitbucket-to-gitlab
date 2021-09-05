@@ -47,6 +47,9 @@ func copyRepos(wsprojects []*WorkspaceProjectPair) {
 		srcRepo := fmt.Sprintf("https://%s@bitbucket.org/%s/%s.git", bitbucket_username, wsp.WorkspaceSlug, wsp.ProjectSlug)
 		log.Printf("Git clone; %s", srcRepo)
 		c := exec.Command("git", "clone", "--mirror", srcRepo, "t")
+		c.Stdout = os.Stdout
+		c.Stdin = os.Stdin
+		c.Stderr = os.Stderr
 		if err := c.Start(); err != nil {
 			log.Printf("%v", err)
 			failed = append(failed, wsp)
@@ -56,6 +59,9 @@ func copyRepos(wsprojects []*WorkspaceProjectPair) {
 		}
 		log.Printf("Remove origin")
 		c = exec.Command("git", "remote", "rm", "origin")
+		c.Stdout = os.Stdout
+		c.Stdin = os.Stdin
+		c.Stderr = os.Stderr
 		pwd, err := os.Getwd()
 		if err != nil {
 			log.Printf("%v", err)
@@ -70,16 +76,12 @@ func copyRepos(wsprojects []*WorkspaceProjectPair) {
 		}
 		dir := path.Join(pwd, "t")
 		c.Dir = dir
-		if err := c.Start(); err != nil {
-			log.Printf("%v", err)
-			failed = append(failed, wsp)
-		} else if err := c.Wait(); err != nil {
-			log.Printf("%v", err)
-			failed = append(failed, wsp)
-		}
 		destRepo := fmt.Sprintf("https://%s.git", path.Join(strings.TrimPrefix(gitlab_url, "https://"), wsp.WorkspaceSlug, wsp.ProjectSlug))
 		log.Printf("Git add origin; %s", destRepo)
 		c = exec.Command("git", "remote", "add", "origin", destRepo)
+		c.Stdout = os.Stdout
+		c.Stdin = os.Stdin
+		c.Stderr = os.Stderr
 		c.Dir = dir
 		if err := c.Start(); err != nil {
 			log.Printf("%v", err)
@@ -90,6 +92,9 @@ func copyRepos(wsprojects []*WorkspaceProjectPair) {
 		}
 		log.Printf("Git push; %s", destRepo)
 		c = exec.Command("git", "push", "--all")
+		c.Stdout = os.Stdout
+		c.Stdin = os.Stdin
+		c.Stderr = os.Stderr
 		c.Dir = dir
 		if err := c.Start(); err != nil {
 			log.Printf("%v", err)
