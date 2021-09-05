@@ -54,7 +54,7 @@ func copyRepos(wsprojects []*WorkspaceProjectPair) {
 		srcRepo := fmt.Sprintf("https://%s@bitbucket.org/%s/%s.git", bitbucket_username, wsp.WorkspaceSlug, wsp.ProjectSlug)
 		log.Printf("Git clone; %s", srcRepo)
 		c := exec.Command("git", "clone", "--mirror", srcRepo, "t")
-		c.Dir = dir
+		c.Dir = pwd
 		c.Stdout = os.Stdout
 		c.Stdin = os.Stdin
 		c.Stderr = os.Stderr
