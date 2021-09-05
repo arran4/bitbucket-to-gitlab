@@ -46,20 +46,34 @@ func copyRepos(wsprojects []*WorkspaceProjectPair) {
 
 		srcRepo := fmt.Sprintf("https://%s@bitbucket.org/%s/%s.git", bitbucket_username, wsp.WorkspaceSlug, wsp.ProjectSlug)
 		log.Printf("Git clone; %s", srcRepo)
-		if err := exec.Command("git", "clone", "--mirror", srcRepo, "t").Wait(); err != nil {
+		c := exec.Command("git", "clone", "--mirror", srcRepo, "t")
+		if err := c.Start(); err != nil {
+			log.Printf("%v", err)
+			failed = append(failed, wsp)
+		} else if err := c.Wait(); err != nil {
 			log.Printf("%v", err)
 			failed = append(failed, wsp)
 		}
 		log.Printf("Remove origin")
-		c := exec.Command("git", "remote", "rm", "origin")
+		c = exec.Command("git", "remote", "rm", "origin")
 		pwd, err := os.Getwd()
 		if err != nil {
 			log.Printf("%v", err)
 			failed = append(failed, wsp)
 		}
+		if err := c.Start(); err != nil {
+			log.Printf("%v", err)
+			failed = append(failed, wsp)
+		} else if err := c.Wait(); err != nil {
+			log.Printf("%v", err)
+			failed = append(failed, wsp)
+		}
 		dir := path.Join(pwd, "t")
 		c.Dir = dir
-		if err := c.Wait(); err != nil {
+		if err := c.Start(); err != nil {
+			log.Printf("%v", err)
+			failed = append(failed, wsp)
+		} else if err := c.Wait(); err != nil {
 			log.Printf("%v", err)
 			failed = append(failed, wsp)
 		}
@@ -67,14 +81,20 @@ func copyRepos(wsprojects []*WorkspaceProjectPair) {
 		log.Printf("Git add origin; %s", destRepo)
 		c = exec.Command("git", "remote", "add", "origin", destRepo)
 		c.Dir = dir
-		if err := c.Wait(); err != nil {
+		if err := c.Start(); err != nil {
+			log.Printf("%v", err)
+			failed = append(failed, wsp)
+		} else if err := c.Wait(); err != nil {
 			log.Printf("%v", err)
 			failed = append(failed, wsp)
 		}
 		log.Printf("Git push; %s", destRepo)
 		c = exec.Command("git", "push", "--all")
 		c.Dir = dir
-		if err := c.Wait(); err != nil {
+		if err := c.Start(); err != nil {
+			log.Printf("%v", err)
+			failed = append(failed, wsp)
+		} else if err := c.Wait(); err != nil {
 			log.Printf("%v", err)
 			failed = append(failed, wsp)
 		}
