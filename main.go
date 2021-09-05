@@ -83,12 +83,13 @@ func copyRepos(wsprojects []*WorkspaceProjectPair) {
 func createRepos(gl *gitlab.Client, wsprojects []*WorkspaceProjectPair) {
 	for _, wsp := range wsprojects {
 		id := fmt.Sprintf("%s/%s", wsp.WorkspaceSlug, wsp.ProjectSlug)
-		log.Printf("id: %s %s", id, url.PathEscape(id))
-		p, _, err := gl.Projects.GetProject(url.PathEscape(id), &gitlab.GetProjectOptions{})
-		// Note this isn't working properly but double creates don't cause any problems
+		log.Printf("id: %s %s", id, url.QueryEscape(id))
+		p, _, err := gl.Projects.GetProject(id, &gitlab.GetProjectOptions{})
 		if err != nil {
 			if strings.Contains(err.Error(), "404 Project Not Found") {
 				log.Printf("Not found creating")
+			} else if strings.Contains(err.Error(), "404 failed to parse unknown error format") {
+				log.Printf("NFI")
 			} else {
 				panic(err)
 			}
