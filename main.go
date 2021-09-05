@@ -36,6 +36,7 @@ func main() {
 }
 
 func copyRepos(wsprojects []*WorkspaceProjectPair) {
+	failed := []*WorkspaceProjectPair{}
 	for _, wsp := range wsprojects {
 
 		if wsp.FullRepo {
@@ -46,37 +47,46 @@ func copyRepos(wsprojects []*WorkspaceProjectPair) {
 		srcRepo := fmt.Sprintf("https://%s@bitbucket.org/%s/%s.git", bitbucket_username, wsp.WorkspaceSlug, wsp.ProjectSlug)
 		log.Printf("Git clone; %s", srcRepo)
 		if err := exec.Command("git", "clone", "--mirror", srcRepo, "t").Run(); err != nil {
-			panic(err)
+			log.Printf("%v", err)
+			failed = append(failed, wsp)
 		}
 		log.Printf("Remove origin")
 		c := exec.Command("git", "remote", "rm", "origin")
 		pwd, err := os.Getwd()
 		if err != nil {
-			panic(err)
+			log.Printf("%v", err)
+			failed = append(failed, wsp)
 		}
 		dir := path.Join(pwd, "t")
 		c.Dir = dir
 		if err := c.Run(); err != nil {
-			panic(err)
+			log.Printf("%v", err)
+			failed = append(failed, wsp)
 		}
-		destRepo := fmt.Sprintf("%s/%s/%s.git", gitlab_url, wsp.WorkspaceSlug, wsp.ProjectSlug)
+		destRepo := fmt.Sprintf("%s.git", path.Join(gitlab_url, wsp.WorkspaceSlug, wsp.ProjectSlug))
 		log.Printf("Git add origin; %s", destRepo)
 		c = exec.Command("git", "remote", "add", "origin", destRepo)
 		c.Dir = dir
 		if err := c.Run(); err != nil {
-			panic(err)
+			log.Printf("%v", err)
+			failed = append(failed, wsp)
 		}
 		log.Printf("Git push; %s", destRepo)
 		c = exec.Command("git", "push", "--all")
 		c.Dir = dir
 		if err := c.Run(); err != nil {
-			panic(err)
+			log.Printf("%v", err)
+			failed = append(failed, wsp)
 		}
 		log.Printf("Done")
 		log.Printf("Deleting: %v", dir)
 		if err := os.RemoveAll(dir); err != nil {
-			panic(err)
+			log.Printf("%v", err)
+			failed = append(failed, wsp)
 		}
+	}
+	for _, wsp := range failed {
+		log.Printf("Failed: %#v", wsp)
 	}
 }
 
