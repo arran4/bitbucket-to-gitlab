@@ -106,7 +106,8 @@ func createRepos(gl *gitlab.Client, wsprojects []*WorkspaceProjectPair) {
 				panic(err)
 			}
 		} else {
-			wsp.FullRepo = p.EmptyRepo
+			log.Printf("full empty status: %v", p.EmptyRepo)
+			wsp.FullRepo = !p.EmptyRepo
 		}
 	}
 }
